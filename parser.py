@@ -85,6 +85,29 @@ class Parser:
         self.match(Kind.ENDWHILE)
         self.emitter.emit_line("}")
 
+    def for_loop(self):
+        self.next()
+        if self.check_token(Kind.IDENT):
+            ident = self.token.text
+            self.emitter.emit("for(int " + self.token.text)
+            self.symbols.add(self.token.text)
+            self.next()
+        else:
+            self.abort("Expected identifier, Got " + self.token.text)
+        self.match(Kind.EQ)
+        self.emitter.emit(" = ")
+        self.unary()
+        self.emitter.emit("; " + ident + " < ")
+        self.match(Kind.TO)
+        self.unary()
+        self.emitter.emit_line("; " + ident + "++){")
+        self.newline()
+
+        while not self.check_token(Kind.NEXT):
+            self.statement()
+        self.match(Kind.NEXT)
+        self.emitter.emit_line("}")
+
     def label(self):
         self.next()
         if self.token.text in self.declared:
@@ -128,6 +151,8 @@ class Parser:
             self.if_statement()
         elif self.check_token(Kind.WHILE):
             self.while_loop()
+        elif self.check_token(Kind.FOR):
+            self.for_loop()
         elif self.check_token(Kind.LABEL):
             self.label()
         elif self.check_token(Kind.GOTO):

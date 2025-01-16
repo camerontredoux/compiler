@@ -4,7 +4,7 @@ Extended with:
 
 - Logical operators (and, or, not)
 - ELSE IF and ELSE
-- FOR loop
+- FOR loop (DONE)
 - Better compiler errors (e.g., what line the error occurred)
 - Functions with parameters and return values
 - Abstract syntax tree representation

@@ -4,7 +4,7 @@ statement ::=
 | "LET" ident "=" expression newline
 | "IF" comparison "THEN" newline {statement} "ENDIF" newline
 | "WHILE" comparison "REPEAT" newline {statement} "ENDWHILE" newline
-| "FOR" ident "=" number "TO" number {statement} "NEXT" newline
+| "FOR" ident "=" unary "TO" unary newline {statement} "NEXT" newline
 | "GOTO" ident newline
 | "INPUT" ident newline
 comparison ::= expression (("==" | "!=" | ">" | ">=" | "<" | "<=") expression)+

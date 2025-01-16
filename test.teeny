@@ -17,6 +17,8 @@ PRINT "Average: "
 PRINT s / a
 PRINT ""
 
-FOR i = 1 TO 10
-    PRINT i
+FOR i = 0 TO 10
+    FOR j = 0 TO i
+        PRINT i * j
+    NEXT
 NEXT

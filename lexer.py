@@ -22,6 +22,9 @@ class Kind(Enum):
     WHILE = 109
     REPEAT = 110
     ENDWHILE = 111
+    FOR = 112
+    TO = 113
+    NEXT = 114
     # Operators
     EQ = 201
     PLUS = 202
@@ -139,11 +142,10 @@ class Lexer:
                     for kind in Kind
                     if kind.value >= 100 and kind.value < 200
                 }
-                match ident:
-                    case _ if ident in keywords:
-                        token = Token(ident, keywords[ident])
-                    case _:
-                        token = Token(ident, Kind.IDENT)
+                if ident in keywords:
+                    token = Token(ident, keywords[ident])
+                else:
+                    token = Token(ident, Kind.IDENT)
             case _:
                 self.abort("Unknown token: " + self.curr)
         self.next()
