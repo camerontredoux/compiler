@@ -16,3 +16,7 @@ ENDWHILE
 PRINT "Average: "
 PRINT s / a
 PRINT ""
+
+FOR i = 1 TO 10
+    PRINT i
+NEXT
