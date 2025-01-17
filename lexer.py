@@ -39,6 +39,7 @@ class Kind(Enum):
     LTEQ = 209
     GT = 210
     GTEQ = 211
+    MOD = 212
 
 
 @dataclass
@@ -107,6 +108,8 @@ class Lexer:
                 token = Token(self.curr, Kind.NEWLINE)
             case "\0":
                 token = Token(self.curr, Kind.EOF)
+            case "%":
+                token = Token(self.curr, Kind.MOD)
             case "=":
                 token = self.peek_next("=", Kind.EQEQ, Kind.EQ)
             case ">":

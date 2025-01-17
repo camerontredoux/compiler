@@ -218,7 +218,11 @@ class Parser:
 
     def term(self):
         self.unary()
-        while self.check_token(Kind.SLASH) or self.check_token(Kind.ASTERISK):
+        while (
+            self.check_token(Kind.SLASH)
+            or self.check_token(Kind.ASTERISK)
+            or self.check_token(Kind.MOD)
+        ):
             self.emitter.emit(self.token.text)
             self.next()
             self.unary()

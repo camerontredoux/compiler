@@ -9,4 +9,4 @@ Extended with:
 - Functions with parameters and return values
 - Abstract syntax tree representation
 - More primitive types (e.g., integer, strings, boolean)
-- Modulo
+- Modulo (DONE)
