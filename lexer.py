@@ -18,6 +18,8 @@ class Kind(Enum):
     LET = 105
     IF = 106
     THEN = 107
+    ELIF = 115
+    ELSE = 116
     ENDIF = 108
     WHILE = 109
     REPEAT = 110

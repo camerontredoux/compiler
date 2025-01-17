@@ -22,3 +22,21 @@ FOR i = 0 TO 10
         PRINT i * j
     NEXT
 NEXT
+
+INPUT test
+IF test < 10 THEN
+    PRINT test
+    PRINT test
+ELIF test < 20 THEN
+    PRINT test
+ELIF test < 30 THEN
+    PRINT "another elif"
+ENDIF
+
+IF 1 < 2 THEN
+    PRINT "bob"
+ELIF 2 > 3 THEN
+    PRINT "sally"
+ELSE
+    PRINT "toad"
+ENDIF

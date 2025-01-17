@@ -67,10 +67,48 @@ class Parser:
         self.newline()
         self.emitter.emit_line("){")
 
-        while not self.check_token(Kind.ENDIF):
+        while (
+            not self.check_token(Kind.ENDIF)
+            and not self.check_token(Kind.ELIF)
+            and not self.check_token(Kind.ELSE)
+        ):
             self.statement()
+
+        if self.check_token(Kind.ELIF):
+            self.emitter.emit_line("}")
+            self.elif_statement()
+
+        if self.check_token(Kind.ELSE):
+            self.emitter.emit("}")
+            self.next()
+            self.newline()
+            self.emitter.emit_line("else {")
+            while not self.check_token(Kind.ENDIF):
+                self.statement()
+
         self.match(Kind.ENDIF)
         self.emitter.emit_line("}")
+
+    def elif_statement(self):
+        self.next()
+        self.emitter.emit("else if(")
+        self.comparison()
+        self.match(Kind.THEN)
+        self.newline()
+        self.emitter.emit_line("){")
+
+        if self.check_token(Kind.ELIF):
+            self.abort("Invalid. ELIF must be followed by one or more statements.")
+        while (
+            not self.check_token(Kind.ENDIF)
+            and not self.check_token(Kind.ELIF)
+            and not self.check_token(Kind.ELSE)
+        ):
+            self.statement()
+
+        if self.check_token(Kind.ELIF):
+            self.emitter.emit_line("}")
+            self.elif_statement()
 
     def while_loop(self):
         self.next()

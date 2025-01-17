@@ -2,7 +2,7 @@ program ::= {statement}
 statement ::=
 | "PRINT" (expression | string) newline
 | "LET" ident "=" expression newline
-| "IF" comparison "THEN" newline {statement} "ENDIF" newline
+| "IF" comparison "THEN" newline {statement} {"ELIF" comparison "THEN" newline {statement}} ["ELSE" newline {statement}] "ENDIF" newline
 | "WHILE" comparison "REPEAT" newline {statement} "ENDWHILE" newline
 | "FOR" ident "=" unary "TO" unary newline {statement} "NEXT" newline
 | "GOTO" ident newline
