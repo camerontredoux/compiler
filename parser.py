@@ -1,5 +1,6 @@
 from emitter import Emitter
 from lexer import Kind, Lexer
+from hashlib import sha1
 
 
 class Parser:
@@ -7,9 +8,11 @@ class Parser:
         self.lexer = lexer
         self.emitter = emitter
 
-        self.symbols = set()
+        self.symbols = dict()
         self.declared = set()
         self.went = set()
+
+        self.curr_type = None
 
         self.token = None
         self.peek = None
@@ -54,10 +57,29 @@ class Parser:
         if self.check_token(Kind.STRING):
             self.emitter.emit_line('printf("' + self.token.text + '\\n");')
             self.next()
+        elif self.check_token(Kind.CHAR):
+            self.emitter.emit_line('printf("%' + "c\\n\", '" + self.token.text + "');")
+            self.next()
         else:
-            self.emitter.emit('printf("%' + '.2f\\n", (float)(')
+            if self.token.text in self.symbols:
+                token_type = self.symbols[self.token.text]
+                match token_type:
+                    case Kind.LETC:
+                        self.emitter.emit('printf("%' + 'c\\n", (')
+                    case Kind.LETF:
+                        self.emitter.emit('printf("%' + 'f\\n", (')
+                    case Kind.LETI:
+                        self.emitter.emit('printf("%' + 'd\\n", (')
+                    case Kind.LETS:
+                        self.emitter.emit('printf("%' + 's\\n", (')
+                    case _:
+                        self.abort("Invalid token (" + self.token.text + ") for PRINT")
+            elif self.check_token(Kind.FLOAT) or self.check_token(Kind.INT):
+                self.emitter.emit('printf("%' + 'f\\n", (')
             self.expression()
             self.emitter.emit_line("));")
+            self.print_float = False
+            self.print_int = False
 
     def if_statement(self):
         self.next()
@@ -128,7 +150,7 @@ class Parser:
         if self.check_token(Kind.IDENT):
             ident = self.token.text
             self.emitter.emit("for(int " + self.token.text)
-            self.symbols.add(self.token.text)
+            self.symbols[self.token.text] = Kind.LETI
             self.next()
         else:
             self.abort("Expected identifier, Got " + self.token.text)
@@ -163,7 +185,7 @@ class Parser:
     def input(self):
         self.next()
         if self.token.text not in self.symbols:
-            self.symbols.add(self.token.text)
+            self.symbols[self.token.text] = self.token.kind
             self.emitter.header_line("float " + self.token.text + ";")
         self.emitter.emit_line('if(0 == scanf("%' + 'f", &' + self.token.text + ")){")
         self.emitter.emit_line(self.token.text + " = 0;")
@@ -172,15 +194,30 @@ class Parser:
         self.match(Kind.IDENT)
 
     def let(self):
+        let_type = self.token.kind
         self.next()
         if self.token.text not in self.symbols:
-            self.symbols.add(self.token.text)
-            self.emitter.header_line("float " + self.token.text + ";")
+            self.symbols[self.token.text] = let_type
+            if let_type == Kind.LETC:
+                self.emitter.header_line("char " + self.token.text + ";")
+                self.curr_type = Kind.CHAR
+            elif let_type == Kind.LETF:
+                self.emitter.header_line("float " + self.token.text + ";")
+                self.curr_type = Kind.FLOAT
+            elif let_type == Kind.LETI:
+                self.emitter.header_line("int " + self.token.text + ";")
+                self.curr_type = Kind.INT
+            elif let_type == Kind.LETS:
+                self.emitter.header_line("char* " + self.token.text + ";")
+                self.curr_type = Kind.STRING
+        else:
+            self.abort("Cannot redeclare variable '" + self.token.text + "'")
         self.emitter.emit(self.token.text + " = ")
         self.match(Kind.IDENT)
         self.match(Kind.EQ)
         self.expression()
         self.emitter.emit_line(";")
+        self.curr_type = None
 
     def statement(self):
         if self.check_token(Kind.PRINT):
@@ -197,7 +234,12 @@ class Parser:
             self.goto()
         elif self.check_token(Kind.INPUT):
             self.input()
-        elif self.check_token(Kind.LET):
+        elif (
+            self.check_token(Kind.LETI)
+            or self.check_token(Kind.LETC)
+            or self.check_token(Kind.LETF)
+            or self.check_token(Kind.LETS)
+        ):
             self.let()
         else:
             self.abort(
@@ -234,8 +276,25 @@ class Parser:
         self.primary()
 
     def primary(self):
-        if self.check_token(Kind.NUMBER):
+        if self.check_token(Kind.FLOAT):
+            if self.curr_type and self.curr_type != Kind.FLOAT:
+                self.abort("Received FLOAT, expected " + self.curr_type.name)
             self.emitter.emit(self.token.text)
+            self.next()
+        elif self.check_token(Kind.INT):
+            if self.curr_type and self.curr_type != Kind.INT:
+                self.abort("Received INT, expected " + self.curr_type.name)
+            self.emitter.emit(self.token.text)
+            self.next()
+        elif self.check_token(Kind.STRING):
+            if self.curr_type and self.curr_type != Kind.STRING:
+                self.abort("Received STRING, expected " + self.curr_type.name)
+            self.emitter.emit('"' + self.token.text + '"')
+            self.next()
+        elif self.check_token(Kind.CHAR):
+            if self.curr_type and self.curr_type != Kind.CHAR:
+                self.abort("Received CHAR, expected " + self.curr_type.name)
+            self.emitter.emit("'" + self.token.text + "'")
             self.next()
         elif self.check_token(Kind.IDENT):
             if self.token.text not in self.symbols:

@@ -7,15 +7,20 @@ class Kind(Enum):
     ERR = 999
     # Other
     NEWLINE = 0
-    NUMBER = 1
-    IDENT = 2
-    STRING = 3
+    IDENT = 1
+    STRING = 2
+    CHAR = 3
+    INT = 4
+    FLOAT = 5
     # Keywords
     LABEL = 101
     GOTO = 102
     PRINT = 103
     INPUT = 104
-    LET = 105
+    LETI = 105
+    LETS = 117
+    LETC = 119
+    LETF = 120
     IF = 106
     THEN = 107
     ELIF = 115
@@ -125,7 +130,12 @@ class Lexer:
                     self.next()
                 text = self.input[start : self.idx]
                 token = Token(text, Kind.STRING)
+            case "'":
+                self.next()
+                token = Token(self.curr, Kind.CHAR)
+                self.next()
             case _ if self.curr.isdigit():
+                number_type = None
                 start = self.idx
                 while self.peek().isdigit():
                     self.next()
@@ -135,8 +145,11 @@ class Lexer:
                         self.abort("Illegal character in number.")
                     while self.peek().isdigit():
                         self.next()
+                    number_type = Kind.FLOAT
+                else:
+                    number_type = Kind.INT
                 number = self.input[start : self.idx + 1]
-                token = Token(number, Kind.NUMBER)
+                token = Token(number, number_type)
             case _ if self.curr.isalpha():
                 start = self.idx
                 while self.peek().isalnum():

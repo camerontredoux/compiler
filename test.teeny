@@ -1,13 +1,9 @@
-PRINT "Printing FizzBuzz from 0 to 100"
-
-FOR i = 1 TO 100
-    IF i % 15 == 0 THEN
-        PRINT "FizzBuzz"
-    ELIF i % 5 == 0 THEN
-        PRINT "Buzz"
-    ELIF i % 3 == 0 THEN
-        PRINT "Fizz"
-    ELSE
-        PRINT i
-    ENDIF
-NEXT
+PRINT 0.1 + 1
+PRINT 1 + 0.1
+PRINT 1
+PRINT 'c'
+PRINT "cameron"
+LETS a = "cameron"
+PRINT a
+LETI a = 2
+PRINT b
